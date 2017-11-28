@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.python.ops import tensor_array_ops, control_flow_ops
 
-
+# NOTE : Have to pass self.y as placeholder and replace self.x w/ self.y
 class Generator(object):
     def __init__(self, num_emb, batch_size, emb_dim, hidden_dim,
                  sequence_length, start_token,
@@ -45,7 +45,7 @@ class Generator(object):
                                              dynamic_size=False, infer_shape=True)
 
         def _g_recurrence(i, x_t, h_tm1, gen_o, gen_x):
-            h_t = self.g_recurrent_unit(x_t, h_tm1)  # hidden_memory_tuple
+            h_t = self.g_recurrent_unit(x_t, h_tm1)  # hidden_memory_tuple # NOTE: x_t represents x (piano)
             o_t = self.g_output_unit(h_t)  # batch x vocab , logits not prob
             log_prob = tf.log(tf.nn.softmax(o_t))
             next_token = tf.cast(tf.reshape(tf.multinomial(log_prob, 1), [self.batch_size]), tf.int32)
@@ -74,7 +74,7 @@ class Generator(object):
         ta_emb_x = ta_emb_x.unstack(self.processed_x)
 
         def _pretrain_recurrence(i, x_t, h_tm1, g_predictions):
-            h_t = self.g_recurrent_unit(x_t, h_tm1)
+            h_t = self.g_recurrent_unit(x_t, h_tm1) # NOTE: x_t represents x (piano)
             o_t = self.g_output_unit(h_t)
             g_predictions = g_predictions.write(i, tf.nn.softmax(o_t))  # batch x vocab_size
             x_tp1 = ta_emb_x.read(i)
@@ -90,6 +90,7 @@ class Generator(object):
         self.g_predictions = tf.transpose(self.g_predictions.stack(), perm=[1, 0, 2])  # batch_size x seq_length x vocab_size
 
         # pretraining loss
+        # NOTE: Have to change self.x (piano) to self.y (guitar)
         self.pretrain_loss = -tf.reduce_sum(
             tf.one_hot(tf.to_int32(tf.reshape(self.x, [-1])), self.num_emb, 1.0, 0.0) * tf.log(
                 tf.clip_by_value(tf.reshape(self.g_predictions, [-1, self.num_emb]), 1e-20, 1.0)
@@ -105,6 +106,8 @@ class Generator(object):
         #######################################################################################################
         #  Unsupervised Training
         #######################################################################################################
+        
+        # NOTE: Might have to change self.x (piano) to self.y (guitar)
         self.g_loss = -tf.reduce_sum(
             tf.reduce_sum(
                 tf.one_hot(tf.to_int32(tf.reshape(self.x, [-1])), self.num_emb, 1.0, 0.0) * tf.log(
