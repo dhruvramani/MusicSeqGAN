@@ -8,8 +8,6 @@ class Discriminator():
     # steps = 20
     def __init__(self, sess, steps, embedding_dim):
         self.sess = sess
-        self.embedding_dim = embedding_dim
-        self.steps = steps
         self.input_x = tf.placeholder(tf.float32, [None, steps, embedding_dim], name="input_x")
         self.y_orig = tf.placeholder(tf.float32, [None, 1], name="y_orig")
         self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
