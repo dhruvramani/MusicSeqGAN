@@ -6,19 +6,20 @@ from keras.models import Sequential
 
 class Discriminator():
     # steps = 20
-    def __init__(self, sess, batch_size, steps, embedding_dim, dropout):
-        self.sess = sess
+    def __init__(self, name, batch_size, steps, embedding_dim, dropout):
+        self.name = name
         self.batch_size = batch_size
         self.steps = steps
         self.embedding_dim = self.embedding_dim # One hot vector 
         self.model_run = self.model(dropout)
 
     def model(self, dropout):
-        model = Sequential()
-        # TODO : Add embedding layer
-        model.add(LSTM(10, input_shape=[self.steps, self.embedding_dim]))
-        model.add(Dropout(dropout))
-        model.add(Dense(1))
+        with tf.name_scope(self.name):
+            model = Sequential()
+            # TODO : Add embedding layer
+            model.add(LSTM(10, input_shape=[self.steps, self.embedding_dim]))
+            model.add(Dropout(dropout))
+            model.add(Dense(1))
         return model
 
     def predict(self, input_x):
