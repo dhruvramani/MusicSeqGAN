@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import tensorflow as tf
-from dataset import get_data
+from dataset import Dataset
 from keras import backend as K
 from generator import Generator
 from discriminators import Discriminator
@@ -13,6 +13,7 @@ _ONEHOT_DIM =
 _DROPOUT = 0.8
 _LEARNING_RATE = 
 _NO_EPOCH = 
+_NO_BATCH = 
 
 def train():
     X = tf.placeholder(tf.float32, shape=[None, _STEPS, _ONEHOT_DIM])
@@ -62,11 +63,12 @@ def train():
         sess.run(tf.global_variables_initializer())
         sess.run(tf.local_variables_initializer())
         saver = tf.train.Saver()
+        data = Dataset(_NO_BATCH, _BATCH_SIZE, _STEPS, _ONEHOT_DIM)
         writer = tf.summary.FileWriter("./tensorboard", sess.graph)
         for epoch in range(_NO_EPOCH):
             losses = [0.0, 0.0, 0.0]
             count = 0
-            for X_train, Y_train in get_batch():
+            for X_train, Y_train in data.get_batch("train"):
                 feed_dict = {X: X_train, Y: Y_train, dropout: _DROPOUT}
                 _, g_loss = sess.run([gtrain, gen_loss], feed_dict=feed_dict)
                 _, dx_loss = sess.run([dXtrain, disc1_loss], feed_dict=feed_dict)
