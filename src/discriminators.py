@@ -10,7 +10,7 @@ class Discriminator():
         self.name = name
         self.batch_size = batch_size
         self.steps = steps
-        self.embedding_dim = self.embedding_dim # One hot vector 
+        self.embedding_dim = embedding_dim # One hot vector 
         self.model_run = self.model(dropout)
 
     def model(self, dropout):
@@ -26,6 +26,6 @@ class Discriminator():
         return self.model_run(input_x)
 
     def loss(self, logits):
-        labels = tf.constant(tf.float32, tf.concat([tf.ones(shape = [self.batch_size, 1]), tf.zeros(shape=[self.batch_size, 1])], axis=1))
+        labels = tf.concat([tf.ones(shape = [self.batch_size, 1]), tf.zeros(shape=[self.batch_size, 1])], axis=0)
         # ALT :  tf.reduce_sum(tf.log(labels + 10e-10) + tf.log(1 - predictions + 10e-10))
-        return tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
+        return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits))

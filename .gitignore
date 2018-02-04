@@ -99,3 +99,12 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+#datasets
+piano\ abc/
+subivic
+guitar\ abc\ files
+src/dataset
+
+src/tensorboard
+.swp

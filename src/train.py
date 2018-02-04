@@ -7,23 +7,23 @@ from generator import Generator
 from discriminators import Discriminator
 
 # TODO
-_BATCH_SIZE = 
-_STEPS = 
-_ONEHOT_DIM = 
+_BATCH_SIZE = 100 
+_STEPS = 34 * 140
+_ONEHOT_DIM = 256
 _DROPOUT = 0.8
-_LEARNING_RATE = 
-_NO_EPOCH = 
-_NO_BATCH = 
+_LEARNING_RATE = 0.01
+_NO_EPOCH = 100
+_NO_BATCH = 40
 
 def train():
-    X = tf.placeholder(tf.float32, shape=[None, _STEPS, _ONEHOT_DIM])
-    Y = tf.placeholder(tf.float32, shape=[None, _STEPS, _ONEHOT_DIM])
-    dropout = tf.placeholder(tf.float32)
+    X = tf.placeholder(tf.float32, shape=[_BATCH_SIZE, _STEPS, _ONEHOT_DIM])
+    Y = tf.placeholder(tf.float32, shape=[_BATCH_SIZE, _STEPS, _ONEHOT_DIM])
+    dropout = _DROPOUT
     
-    XYgen = Generator('XYgen', _BATCH_SIZE, _STEPS, _ONEHOT_DIM, dropout)
-    YXgen = Generator('YXgen', _BATCH_SIZE, _STEPS, _ONEHOT_DIM, dropout)
-    YDisc = Discriminator('Ydisc', _BATCH_SIZE, _STEPS, _ONEHOT_DIM, dropout)
-    XDisc = Discriminator('Xdisc', _BATCH_SIZE, _STEPS, _ONEHOT_DIM, dropout)
+    XYgen = Generator('XYgen', _BATCH_SIZE, _STEPS, _ONEHOT_DIM, _DROPOUT)
+    YXgen = Generator('YXgen', _BATCH_SIZE, _STEPS, _ONEHOT_DIM, _DROPOUT)
+    YDisc = Discriminator('Ydisc', _BATCH_SIZE, _STEPS, _ONEHOT_DIM, _DROPOUT)
+    XDisc = Discriminator('Xdisc', _BATCH_SIZE, _STEPS, _ONEHOT_DIM, _DROPOUT)
 
     Yfake = XYgen.predict(X)
     Xfake = YXgen.predict(Y)
@@ -40,7 +40,7 @@ def train():
     disc1_loss = XDisc.loss(DiscX) 
     disc2_loss = YDisc.loss(DiscY) 
 
-    gen_loss = XYgen.loss(X, Yfake) + YXgen.loss(Y, Xfake)
+    gen_loss = XYgen.loss(Yfake) + YXgen.loss(Xfake)
     cycle_loss = tf.square(Xback - X) + tf.square(Yback - Y)
     gen_loss += cycle_loss
 
@@ -77,7 +77,8 @@ def train():
                 losses[1] += dx_loss
                 losses[2] += dy_loss
                 writer.add_summary(summ, count)
-                print("Gen : {} Dx : {} Dy : {}".format(g_loss, dx_loss, dy_loss), end='\r')
+                print("Gen : {} Dx : {} Dy : {}".format(g_loss, dx_loss, dy_loss))
+                print('\r')
                 count += 1
             losses = [i/count for i in losses]
             print("Epoch # {} - Gen : {}, Dx : {}, Dy : {}".format(count, losses[0], losses[1], losses[2]))
@@ -85,4 +86,4 @@ def train():
 
         sess.close()
 
-
+train()

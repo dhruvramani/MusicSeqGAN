@@ -5,10 +5,10 @@ from keras.models import Sequential
 from keras.layers import LSTM, Dense, Dropout
 
 class Generator(object):
-    def __init__(self, batch_size, steps, embedding_dim, dropout):
+    def __init__(self, name, batch_size, steps, embedding_dim, dropout):
         self.name = name
         self.batch_size = batch_size
-        self.steps = step
+        self.steps = steps
         self.embedding_dim = embedding_dim
         self.model_run = self.model(dropout)
 
@@ -23,5 +23,8 @@ class Generator(object):
     def predict(self, input):
         return self.model_run(input)
 
-    def loss(self, predictons):
-        # Implement like discriminator_on_generator_loss
+    def loss(self, predictions):
+        return 0.0
+        #labels = tf.concat([tf.ones(shape = [self.batch_size, 1]), tf.zeros(shape=[self.batch_size, 1])], axis=0)
+        # ALT :  tf.reduce_sum(tf.log(labels + 10e-10) + tf.log(1 - predictions + 10e-10))
+        #return tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=predictions)
