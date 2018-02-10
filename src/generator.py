@@ -24,7 +24,7 @@ class Generator(object):
         return self.model_run(input)
 
     def loss(self, predictions):
-        return 0.0
+        return tf.reduce_mean(tf.log(predictions))
         #labels = tf.concat([tf.ones(shape = [self.batch_size, 1]), tf.zeros(shape=[self.batch_size, 1])], axis=0)
         # ALT :  tf.reduce_sum(tf.log(labels + 10e-10) + tf.log(1 - predictions + 10e-10))
         #return tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=predictions)

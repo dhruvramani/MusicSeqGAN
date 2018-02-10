@@ -55,7 +55,16 @@ def train():
 
     dXtrain = tf.train.AdamOptimizer(_LEARNING_RATE, beta1=0.5).minimize(disc1_loss, var_list=dXvar)
     dYtrain = tf.train.AdamOptimizer(_LEARNING_RATE, beta1=0.5).minimize(disc2_loss, var_list=dYvar)
-    gtrain  = tf.train.AdamOptimizer(_LEARNING_RATE, beta1=0.5).minimize(gen_loss, var_list=gvar)
+    gOptim  = tf.train.AdamOptimizer(_LEARNING_RATE, beta1=0.5)
+
+    val_accuracy = 1.0
+    gradients = gOptim.compute_gradients(loss=gen_loss, var_list=gvar)
+    
+    for i, (grad, var) in enumerate(gradients):
+        if grad is not None:
+            gradients[i] = (grad * val_accuracy, var)
+
+    gtrain = gOptim.apply_gradients(gradients)
 
     merged = tf.summary.merge_all()
 
