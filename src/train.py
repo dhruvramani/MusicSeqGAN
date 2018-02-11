@@ -78,7 +78,7 @@ def train():
             losses = [0.0, 0.0, 0.0]
             count = 0
             for X_train, Y_train in data.get_batch("train"):
-                feed_dict = {X: X_train, Y: Y_train, dropout: np.asarray(_DROPOUT)}
+                feed_dict = {X: X_train, Y: Y_train, dropout: _DROPOUT}
                 _, g_loss = sess.run([gtrain, gen_loss], feed_dict=feed_dict)
                 _, dx_loss = sess.run([dXtrain, disc1_loss], feed_dict=feed_dict)
                 summ, _, dy_loss = sess.run([merged, dYtrain, disc2_loss], feed_dict=feed_dict)
