@@ -7,30 +7,43 @@ class Dataset(object):
         self.batch_size = batch_size
         self.steps = steps
         self.embedding_dim = embedding_dim
+        self.counter = 0
 
     def string_vectorizer(self, strng, alphabet=[chr(i) for i in range(0, 256)]):
         # SOURCE : https://stackoverflow.com/questions/43618245/how-to-one-hot-encode-sentences-at-the-character-level
         vector = [np.asarray([0 if char != letter else 1 for char in alphabet]) for letter in strng]
+        a = vector
+        while(len(vector) <self.steps):
+            vector.extend(a)
+        if(len(vector) > self.steps):
+            vector = vector[:self.steps]
+
         return np.asarray(vector)
 
     def get_data(self, datatype):
+
         filepath = "./dataset/{}/".format(datatype)
         x, y = list(), list()
-        for i in range(self.batch_size):
-            print i
+        old_cnt = 0
+        i = self.counter
+        while old_cnt < self.batch_size:
+            #print i
             x_path, y_path = "{}piano/{}.abc".format(filepath, i), "{}guitar/{}.abc".format(filepath, i)
             if(not os.path.isfile(x_path) or not os.path.isfile(y_path)):
+                i+=1
                 continue
             with open(x_path, "r") as f:
                 content = f.read()
                 x.append(self.string_vectorizer(content))
-            print "x processed"
+            #print "x processed"
 
             with open(y_path, "r") as f:
                 content = f.read()
                 y.append(self.string_vectorizer(content))
-            print "y processed"
-        
+            #print "y processed"
+            old_cnt += 1;
+            self.counter = i
+            i+=1
         if(0 in [len(x), len(y)]):
             return None, None
         x, y = np.asarray(x), np.asarray(y)

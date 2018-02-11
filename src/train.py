@@ -7,8 +7,8 @@ from generator import Generator
 from discriminators import Discriminator
 
 # TODO
-_BATCH_SIZE = 100 
-_STEPS = 34 * 140
+_BATCH_SIZE = 20 
+_STEPS = 1000
 _ONEHOT_DIM = 256
 _DROPOUT = 0.8
 _LEARNING_RATE = 0.01
@@ -18,7 +18,7 @@ _NO_BATCH = 40
 def train():
     X = tf.placeholder(tf.float32, shape=[_BATCH_SIZE, _STEPS, _ONEHOT_DIM])
     Y = tf.placeholder(tf.float32, shape=[_BATCH_SIZE, _STEPS, _ONEHOT_DIM])
-    dropout = _DROPOUT
+    dropout = tf.placeholder(tf.float32)
     
     XYgen = Generator('XYgen', _BATCH_SIZE, _STEPS, _ONEHOT_DIM, _DROPOUT)
     YXgen = Generator('YXgen', _BATCH_SIZE, _STEPS, _ONEHOT_DIM, _DROPOUT)
@@ -78,7 +78,7 @@ def train():
             losses = [0.0, 0.0, 0.0]
             count = 0
             for X_train, Y_train in data.get_batch("train"):
-                feed_dict = {X: X_train, Y: Y_train, dropout: _DROPOUT}
+                feed_dict = {X: X_train, Y: Y_train, dropout: np.asarray(_DROPOUT)}
                 _, g_loss = sess.run([gtrain, gen_loss], feed_dict=feed_dict)
                 _, dx_loss = sess.run([dXtrain, disc1_loss], feed_dict=feed_dict)
                 summ, _, dy_loss = sess.run([merged, dYtrain, disc2_loss], feed_dict=feed_dict)
