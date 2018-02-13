@@ -18,7 +18,7 @@ _NO_BATCH = 40
 def train():
     X = tf.placeholder(tf.float32, shape=[_BATCH_SIZE, _STEPS, _ONEHOT_DIM])
     Y = tf.placeholder(tf.float32, shape=[_BATCH_SIZE, _STEPS, _ONEHOT_DIM])
-    dropout = tf.placeholder(tf.float32)
+    dropout = _DROPOUT
     
     XYgen = Generator('XYgen', _BATCH_SIZE, _STEPS, _ONEHOT_DIM, _DROPOUT)
     YXgen = Generator('YXgen', _BATCH_SIZE, _STEPS, _ONEHOT_DIM, _DROPOUT)
@@ -37,16 +37,16 @@ def train():
     DiscX = tf.concat([DiscXreal, DiscXfake], axis=0)
     DiscY = tf.concat([DiscYreal, DiscYfake], axis=0)
     
-    disc1_loss = XDisc.loss(DiscX) 
-    disc2_loss = YDisc.loss(DiscY) 
+    disc1_loss, labels_x = XDisc.loss(DiscX) 
+    disc2_loss, labels_y = YDisc.loss(DiscY) 
 
     gen_loss = XYgen.loss(Yfake) + YXgen.loss(Xfake)
     cycle_loss = tf.square(Xback - X) + tf.square(Yback - Y)
     gen_loss += cycle_loss
 
-    tf.summary.scalar("gen_loss", gen_loss)
-    tf.summary.scalar("discY_loss", disc2_loss)
-    tf.summary.scalar("discX_loss", disc1_loss)
+    #tf.summary.scalar("gen_loss", gen_loss)
+    #tf.summary.scalar("discY_loss", disc2_loss)
+    #tf.summary.scalar("discX_loss", disc1_loss)
 
     tvars = tf.trainable_variables()
     dXvar = [var for var in tvars if 'Xdisc' in var.name]
@@ -57,7 +57,7 @@ def train():
     dYtrain = tf.train.AdamOptimizer(_LEARNING_RATE, beta1=0.5).minimize(disc2_loss, var_list=dYvar)
     gOptim  = tf.train.AdamOptimizer(_LEARNING_RATE, beta1=0.5)
 
-    val_accuracy = 1.0
+    val_accuracy = tf.reduce_mean(tf.cast(tf.equal(labels_x, DiscX), tf.float32)) + tf.reduce_mean(tf.cast(tf.equal(labels_y, DiscY), tf.float32))
     gradients = gOptim.compute_gradients(loss=gen_loss, var_list=gvar)
     
     for i, (grad, var) in enumerate(gradients):
@@ -66,26 +66,26 @@ def train():
 
     gtrain = gOptim.apply_gradients(gradients)
 
-    merged = tf.summary.merge_all()
+    #merged = tf.summary.merge_all()
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         sess.run(tf.local_variables_initializer())
         saver = tf.train.Saver()
         data = Dataset(_NO_BATCH, _BATCH_SIZE, _STEPS, _ONEHOT_DIM)
-        writer = tf.summary.FileWriter("./tensorboard", sess.graph)
+        #writer = tf.summary.FileWriter("./tensorboard", sess.graph)
         for epoch in range(_NO_EPOCH):
             losses = [0.0, 0.0, 0.0]
             count = 0
             for X_train, Y_train in data.get_batch("train"):
-                feed_dict = {X: X_train, Y: Y_train, dropout: _DROPOUT}
+                feed_dict = {X: X_train, Y: Y_train}
                 _, g_loss = sess.run([gtrain, gen_loss], feed_dict=feed_dict)
                 _, dx_loss = sess.run([dXtrain, disc1_loss], feed_dict=feed_dict)
-                summ, _, dy_loss = sess.run([merged, dYtrain, disc2_loss], feed_dict=feed_dict)
+                _, dy_loss = sess.run([dYtrain, disc2_loss], feed_dict=feed_dict)
                 losses[0] += g_loss
                 losses[1] += dx_loss
                 losses[2] += dy_loss
-                writer.add_summary(summ, count)
+                #writer.add_summary(summ, count)
                 print("Gen : {} Dx : {} Dy : {}".format(g_loss, dx_loss, dy_loss))
                 print('\r')
                 count += 1

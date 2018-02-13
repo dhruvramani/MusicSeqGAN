@@ -18,7 +18,7 @@ class Discriminator():
             model = Sequential()
             # TODO : Add embedding layer
             model.add(LSTM(10, input_shape=[self.steps, self.embedding_dim]))
-            model.add(Dropout(dropout))
+            #model.add(Dropout(dropout))
             model.add(Dense(1))
         return model
 
@@ -28,4 +28,4 @@ class Discriminator():
     def loss(self, logits):
         labels = tf.concat([tf.ones(shape = [self.batch_size, 1]), tf.zeros(shape=[self.batch_size, 1])], axis=0)
         # ALT :  tf.reduce_sum(tf.log(labels + 10e-10) + tf.log(1 - predictions + 10e-10))
-        return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits))
+        return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)), labels
