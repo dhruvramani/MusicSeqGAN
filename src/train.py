@@ -57,7 +57,7 @@ def train():
     dYtrain = tf.train.AdamOptimizer(_LEARNING_RATE, beta1=0.5).minimize(disc2_loss, var_list=dYvar)
     gOptim  = tf.train.AdamOptimizer(_LEARNING_RATE, beta1=0.5)
 
-    val_accuracy = tf.reduce_mean(tf.cast(tf.equal(labels_x, DiscX), tf.float32)) + tf.reduce_mean(tf.cast(tf.equal(labels_y, DiscY), tf.float32))
+    val_accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(labels_x), tf.argmax(DiscX)), tf.float32)) + tf.reduce_mean(tf.cast(tf.equal(tf.argmax(labels_y), tf.argmax(DiscY)), tf.float32))
     gradients = gOptim.compute_gradients(loss=gen_loss, var_list=gvar)
     
     for i, (grad, var) in enumerate(gradients):
@@ -69,8 +69,9 @@ def train():
     #merged = tf.summary.merge_all()
 
     with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
-        sess.run(tf.local_variables_initializer())
+        #saver.restore(sess, "./checkpoint/model.ckpt")  # Uncomment
+        sess.run(tf.global_variables_initializer()) # Comment
+        sess.run(tf.local_variables_initializer())  # Comment
         saver = tf.train.Saver()
         data = Dataset(_NO_BATCH, _BATCH_SIZE, _STEPS, _ONEHOT_DIM)
         #writer = tf.summary.FileWriter("./tensorboard", sess.graph)
