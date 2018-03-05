@@ -69,17 +69,20 @@ def train():
     #merged = tf.summary.merge_all()
 
     with tf.Session() as sess:
+        saver = tf.train.Saver()
         #saver.restore(sess, "./checkpoint/model.ckpt")  # Uncomment
         sess.run(tf.global_variables_initializer()) # Comment
         sess.run(tf.local_variables_initializer())  # Comment
-        saver = tf.train.Saver()
         data = Dataset(_NO_BATCH, _BATCH_SIZE, _STEPS, _ONEHOT_DIM)
         #writer = tf.summary.FileWriter("./tensorboard", sess.graph)
+        # X_test, _ = data.get_data("test")
+        # sess.run(XYgen, feed_dict = {X : X_test})
+        # To test, comment everything below and uncomment line above.
         for epoch in range(_NO_EPOCH):
             losses = [0.0, 0.0, 0.0]
             count = 0
             for X_train, Y_train in data.get_batch("train"):
-                feed_dict = {X: X_train, Y: Y_train}
+                feed_dict = {X: X_train, Y: Y_train}                       
                 _, g_loss = sess.run([gtrain, gen_loss], feed_dict=feed_dict)
                 _, dx_loss = sess.run([dXtrain, disc1_loss], feed_dict=feed_dict)
                 _, dy_loss = sess.run([dYtrain, disc2_loss], feed_dict=feed_dict)
