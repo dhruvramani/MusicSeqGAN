@@ -76,7 +76,7 @@ def train():
         data = Dataset(_NO_BATCH, _BATCH_SIZE, _STEPS, _ONEHOT_DIM)
         #writer = tf.summary.FileWriter("./tensorboard", sess.graph)
         # X_test, _ = data.get_data("test")
-        # sess.run(XYgen, feed_dict = {X : X_test})
+        # print(sess.run(Y_fake, feed_dict = {X : X_test}))
         # To test, comment everything below and uncomment line above.
         for epoch in range(_NO_EPOCH):
             losses = [0.0, 0.0, 0.0]
