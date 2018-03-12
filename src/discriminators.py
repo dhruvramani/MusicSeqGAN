@@ -18,7 +18,7 @@ class Discriminator():
             model = Sequential()
             # TODO : Add embedding layer
             model.add(LSTM(10, input_shape=[self.steps, self.embedding_dim]))
-            #model.add(Dropout(dropout))
+            model.add(Dropout(dropout))
             model.add(Dense(1))
         return model
 
