@@ -16,7 +16,9 @@ class Generator(object):
         with tf.name_scope(self.name):
             model = Sequential()
             model.add(LSTM(32, return_sequences=True, input_shape=(self.steps, self.embedding_dim)))
+            model.add(Dropout(dropout))
             model.add(LSTM(32, return_sequences=True))
+            model.add(Dropout(dropout))
             model.add(Dense(self.embedding_dim, activation="softmax"))
         return model
 
